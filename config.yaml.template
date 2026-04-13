@@ -1,0 +1,17 @@
+# GLaDOS 自动签到配置文件
+# 复制此文件为 config.yaml 并填入你的真实配置
+
+# PushPlus 推送秘钥（可选）
+# 获取方式：访问 https://www.pushplus.plus/ 登录后获取
+pushplus_token: ""
+
+# GLaDOS Cookie 配置
+# 获取方式：
+# 1. 登录 https://glados.cloud
+# 2. 浏览器按 F12 打开开发者工具
+# 3. 切换到 Network 标签
+# 4. 点击页面上的 "签到" 按钮
+# 5. 找到 /api/user/checkin 请求，复制请求头中的 Cookie 值
+cookies:
+  - cookie: "your_cookie_here_for_account_1"
+  - cookie: "your_cookie_here_for_account_2"

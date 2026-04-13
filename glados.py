@@ -1,18 +1,49 @@
-import requests,json,os
+import requests
+import json
+import os
+import yaml
+
+# -------------------------------------------------------------------------------------------
+# 加载配置文件
+# -------------------------------------------------------------------------------------------
+def load_config():
+    """加载配置文件，优先从 yaml 文件读取，环境变量作为备选"""
+    config_file = os.path.join(os.path.dirname(__file__), 'config.yaml')
+
+    # 如果存在配置文件，从 yaml 读取
+    if os.path.exists(config_file):
+        with open(config_file, 'r', encoding='utf-8') as f:
+            return yaml.safe_load(f)
+
+    # 否则使用环境变量
+    cookie_str = os.environ.get("GLADOS_COOKIE", "")
+    if not cookie_str:
+        print('未找到配置文件 config.yaml 或 GLADOS_COOKIE 环境变量')
+        exit(0)
+
+    # 将环境变量的 cookie 转换为配置格式
+    cookies = [{"cookie": c} for c in cookie_str.split("&")]
+    return {
+        "pushplus_token": os.environ.get("PUSHPLUS_TOKEN", ""),
+        "cookies": cookies
+    }
+
 # -------------------------------------------------------------------------------------------
 # github workflows
 # -------------------------------------------------------------------------------------------
 if __name__ == '__main__':
+    # 加载配置
+    config = load_config()
+
     # pushplus 秘钥
-    sckey = os.environ.get("PUSHPLUS_TOKEN", "")
+    sckey = config.get("pushplus_token", "")
     sendContent = ''
-    
-    # 获取并分割 Cookie
-    cookie_str = os.environ.get("GLADOS_COOKIE", "")
-    if not cookie_str:
-        print('未获取到 COOKIE 变量')
+
+    # 获取 Cookie 列表
+    cookies = config.get("cookies", [])
+    if not cookies:
+        print('配置中未找到 Cookie')
         exit(0)
-    cookies = cookie_str.split("&")
 
     # 关键配置更新
     url = "https://glados.cloud/api/user/checkin"
@@ -24,7 +55,10 @@ if __name__ == '__main__':
     
     payload = {'token': 'glados.one'}
 
-    for cookie in cookies:
+    for cookie_item in cookies:
+        cookie = cookie_item.get("cookie", "")
+        if not cookie:
+            continue
         headers = {
             'cookie': cookie,
             'referer': referer,
